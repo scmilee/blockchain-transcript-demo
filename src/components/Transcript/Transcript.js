@@ -6,6 +6,7 @@ import Web3 from 'web3'
 import bs58 from 'bs58'
 import IPFS from 'ipfs-http-client'
 import crypto from 'eth-crypto'
+import dotenv from 'dotenv'
 
 const abis = require('./ABI/testnet/abi.js');
 
@@ -18,13 +19,13 @@ const ipfs = IPFS('/ip4/127.0.0.1/tcp/5001');
 class Transcript extends Component {
   constructor(props) {
     super(props);
-    this.web3 = new Web3('https://ropsten.infura.io/v3/f6f39492a4614becb983add461f58578');
-    this.web3.eth.accounts.wallet.add('0x7306a015bd8b700cd28413ebf61168aebaadd57f12f80e5b9453f3d13bc9588f');
-    this.address = '0x758448D21eAc51a7749D341D43418Cfa105c1FdA';
+    this.web3 = new Web3('https://ropsten.infura.io/v3/');
+    this.web3.eth.accounts.wallet.add('');
+    this.address = '';
 
     this.contract = new this.web3.eth.Contract(
       abis.GGPoint.abi, 
-      '0x1d91cA279EC2dF7fEeD753E0F228ae24d1C3f45a',
+      '',
       { from: this.address },
     );
 
