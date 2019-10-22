@@ -1,12 +1,12 @@
 
-import React, { Component } from 'react'
-import ReactTable from 'react-table'
-import 'react-table/react-table.css'
-import Web3 from 'web3'
-import bs58 from 'bs58'
-import IPFS from 'ipfs-http-client'
-import crypto from 'eth-crypto'
-import dotenv from 'dotenv'
+import React, { Component } from 'react';
+import ReactTable from 'react-table';
+import 'react-table/react-table.css';
+import Web3 from 'web3';
+import bs58 from 'bs58';
+import IPFS from 'ipfs-http-client';
+import crypto from 'eth-crypto';
+import dotenv from 'dotenv';
 
 const abis = require('./ABI/testnet/abi.js');
 
@@ -73,7 +73,7 @@ class Transcript extends Component {
   };
 
   getHashes = ()=> {
-    this.contract.methods.getTranscripts('0x25094bccb2b936f4dccfd2fe992065eb388be323').call().then((hexHashes) => {
+    this.contract.methods.getTranscripts('').call().then((hexHashes) => {
       const hashes = hexHashes.map(bytes32Hex => {
         const hashHex = "1220" + bytes32Hex.slice(2)
         const hashBytes = Buffer.from(hashHex, 'hex');
@@ -90,7 +90,7 @@ class Transcript extends Component {
     const resolvedHashes = await Promise.all(hashPromises);
     const decrypedTranscriptPromises = resolvedHashes.map(hash => {
       const encryptedTranscript = JSON.parse(hash[0].content.toString());
-      return crypto.decryptWithPrivateKey('0x7306a015bd8b700cd28413ebf61168aebaadd57f12f80e5b9453f3d13bc9588f', encryptedTranscript)
+      return crypto.decryptWithPrivateKey('', encryptedTranscript)
     });
     const transcripts = await Promise.all(decrypedTranscriptPromises);
     const transcriptObjects = [];
