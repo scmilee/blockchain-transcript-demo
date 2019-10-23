@@ -1,15 +1,19 @@
 
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
+import _ from 'lodash';
 import 'react-table/react-table.css';
 import Web3 from 'web3';
 import bs58 from 'bs58';
+import Provider from 'truffle-hdwallet-provider'
 import IPFS from 'ipfs-http-client';
 import crypto from 'eth-crypto';
 import dotenv from 'dotenv';
 
 const abis = require('./ABI/testnet/abi.js');
-
+const mnemonic = process.env.QA_LEARNER_MNEMONIC;
+const blockchainNode = process.env.QA_INFURA_ENDPOINT;
+const ggPointAddress = process.env.QA_GGPOINT_ADDRESS;
 const Transcripts = () => (
   <Transcript></Transcript>
 );
@@ -19,13 +23,13 @@ const ipfs = IPFS('/ip4/127.0.0.1/tcp/5001');
 class Transcript extends Component {
   constructor(props) {
     super(props);
-    this.web3 = new Web3('https://ropsten.infura.io/v3/');
-    this.web3.eth.accounts.wallet.add('');
-    this.address = '';
+    this.provider = new Provider(mnemonic, blockchainNode);
+    this.web3 = new Web3(this.provider);
+    this.address = _.keys(web3._currentProvider.connection.wallets)[0];
 
     this.contract = new this.web3.eth.Contract(
       abis.GGPoint.abi, 
-      '',
+      ggPointAddress,
       { from: this.address },
     );
 
