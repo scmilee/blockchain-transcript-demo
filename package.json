@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@truffle/hdwallet-provider": "^1.0.22",
     "bs58": "^4.0.1",
     "dotenv": "^8.2.0",
     "eth-crypto": "^1.5.0",
@@ -13,7 +14,7 @@
     "react-scripts": "3.2.0",
     "react-table": "^6.10.3",
     "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.2.1"
+    "web3": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
