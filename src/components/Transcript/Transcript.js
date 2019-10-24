@@ -9,6 +9,7 @@ import Provider from 'truffle-hdwallet-provider'
 import IPFS from 'ipfs-http-client';
 import crypto from 'eth-crypto';
 import dotenv from 'dotenv';
+dotenv.config();
 
 const abis = require('./ABI/testnet/abi.js');
 const mnemonic = process.env.QA_LEARNER_MNEMONIC;
@@ -25,7 +26,7 @@ class Transcript extends Component {
     super(props);
     this.provider = new Provider(mnemonic, blockchainNode);
     this.web3 = new Web3(this.provider);
-    this.address = _.keys(web3._currentProvider.connection.wallets)[0];
+    this.address = _.keys(this.web3._currentProvider.connection.wallets)[0];
 
     this.contract = new this.web3.eth.Contract(
       abis.GGPoint.abi, 
@@ -77,7 +78,7 @@ class Transcript extends Component {
   };
 
   getHashes = ()=> {
-    this.contract.methods.getTranscripts('').call().then((hexHashes) => {
+    this.contract.methods.getTranscripts(this.address).call().then((hexHashes) => {
       const hashes = hexHashes.map(bytes32Hex => {
         const hashHex = "1220" + bytes32Hex.slice(2)
         const hashBytes = Buffer.from(hashHex, 'hex');
