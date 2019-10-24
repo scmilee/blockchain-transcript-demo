@@ -5,16 +5,15 @@ import _ from 'lodash';
 import 'react-table/react-table.css';
 import Web3 from 'web3';
 import bs58 from 'bs58';
-import Provider from 'truffle-hdwallet-provider'
+import Provider from '@truffle/hdwallet-provider'
 import IPFS from 'ipfs-http-client';
 import crypto from 'eth-crypto';
-import dotenv from 'dotenv';
-dotenv.config();
 
 const abis = require('./ABI/testnet/abi.js');
-const mnemonic = process.env.QA_LEARNER_MNEMONIC;
-const blockchainNode = process.env.QA_INFURA_ENDPOINT;
-const ggPointAddress = process.env.QA_GGPOINT_ADDRESS;
+const mnemonic = process.env.REACT_APP_QA_USER_MNEMONIC;
+const blockchainNode = process.env.REACT_APP_QA_INFURA_ENDPOINT;
+const ggPointAddress = process.env.REACT_APP_QA_GGPOINT_ADDRESS;
+
 const Transcripts = () => (
   <Transcript></Transcript>
 );
@@ -26,7 +25,8 @@ class Transcript extends Component {
     super(props);
     this.provider = new Provider(mnemonic, blockchainNode);
     this.web3 = new Web3(this.provider);
-    this.address = _.keys(this.web3._currentProvider.connection.wallets)[0];
+    console.log(this.web3)
+    this.address = this.web3._provider.addresses[0];
 
     this.contract = new this.web3.eth.Contract(
       abis.GGPoint.abi, 
