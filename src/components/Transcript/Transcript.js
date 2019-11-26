@@ -5,29 +5,26 @@ import _ from 'lodash';
 import 'react-table/react-table.css';
 import Web3 from 'web3';
 import bs58 from 'bs58';
-import Provider from '@truffle/hdwallet-provider'
 import IPFS from 'ipfs-http-client';
 import crypto from 'eth-crypto';
 
 const abis = require('./ABI/testnet/abi.js');
 const mnemonic = process.env.REACT_APP_QA_USER_MNEMONIC;
-const blockchainNode = process.env.REACT_APP_QA_INFURA_ENDPOINT;
 const ggPointAddress = process.env.REACT_APP_QA_GGPOINT_ADDRESS;
 
 const Transcripts = () => (
   <Transcript></Transcript>
 );
 
-const ipfs = IPFS('/ip4/127.0.0.1/tcp/5001');
+const ipfs = IPFS('ipfs.infura.io', 5001,{protocol: "https"});
 
 class Transcript extends Component {
   constructor(props) {
     super(props);
-    this.provider = new Provider(mnemonic, blockchainNode);
     this.web3 = new Web3(this.provider);
-    console.log(this.web3)
+  
     this.address = this.web3._provider.addresses[0];
-
+    console.log(this.address)
     this.contract = new this.web3.eth.Contract(
       abis.GGPoint.abi, 
       ggPointAddress,
@@ -79,6 +76,7 @@ class Transcript extends Component {
 
   getHashes = ()=> {
     this.contract.methods.getTranscripts(this.address).call().then((hexHashes) => {
+      console.log(hexHashes)
       const hashes = hexHashes.map(bytes32Hex => {
         const hashHex = "1220" + bytes32Hex.slice(2)
         const hashBytes = Buffer.from(hashHex, 'hex');
@@ -93,6 +91,7 @@ class Transcript extends Component {
       return ipfs.get(hash);
     })
     const resolvedHashes = await Promise.all(hashPromises);
+    console.log(resolvedHashes)
     const decrypedTranscriptPromises = resolvedHashes.map(hash => {
       const encryptedTranscript = JSON.parse(hash[0].content.toString());
       return crypto.decryptWithPrivateKey('', encryptedTranscript)
