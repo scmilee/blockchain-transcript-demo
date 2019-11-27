@@ -7,7 +7,7 @@ import * as CSV from 'csv-string';
 import Web3 from 'web3';
 import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components'
-
+import HDWalletProvider from '@truffle/hdwallet-provider'
 const getColor = (props) => {
   if (props.isDragAccept) {
       return '#00e676';
@@ -43,7 +43,7 @@ const Transcripts = () => (
 );
 
 const StyledDropzone = (props)=> {
-
+  const { onFile } = props;
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -53,7 +53,7 @@ const StyledDropzone = (props)=> {
       // Do whatever you want with the file contents
         const binaryStr = reader.result
         const string = new TextDecoder("utf-8").decode(binaryStr)
-        props.onFile(CSV.parse(string))
+        onFile(CSV.parse(string))
       }
       reader.readAsArrayBuffer(file)
     })
@@ -84,7 +84,10 @@ const StyledDropzone = (props)=> {
 class Transcript extends Component {
   constructor(props) {
     super(props);
-
+    this.web3 = new Web3(new HDWalletProvider(process.env.REACT_APP_QA_ADMIN_MNEMONIC, process.env.REACT_APP_QA_INFURA_ENDPOINT));
+    this.trustedOracles = {
+      '0x28841345caadffac6907cb35ac26d4f79f5ebdff' : 'CBT-Nuggets' 
+    }
     this.state = {
       hashes: [],
       csv: false,
@@ -97,24 +100,53 @@ class Transcript extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  onFile = (fileArray) => {
-    console.log(fileArray)
-    const headers = fileArray.shift();
+  onFile = async(fileArray) => {
+    //remove headers line
+    fileArray.shift();
 
-    const entries = _.map(fileArray, (line) => {
+    const headers = [
+      "memberId",
+      "validatedMinutes",
+      "completedAt",
+      "name",
+      "timeSpent"
+    ]
+    //loop through each line
+    const entries = await _.map(fileArray, async(line) => {
+      
+      const signature = line.pop();
+      const hash = line.pop();
+
       const entry = {};
       _.forEach(line, (datapoint, i)=> {
         entry[headers[i]] = datapoint
-      })
-      return entry
-    })
-    this.setState({ csv: entries })
+      });
+      
+      //convert entries back to numbers (can be fixed in future to just use strings)
+      entry.memberId = Number.parseInt(entry.memberId);
+      entry.validatedMinutes = Number.parseInt(entry.validatedMinutes);
+      entry.timeSpent = Number.parseInt(entry.timeSpent);
+
+      //generate new hash
+      const checksumHash = this.web3.utils.soliditySha3(JSON.stringify(entry));
+      if(checksumHash !== hash) return entry;
+      //check to see if signature is valid
+      const skillAuthor = await this.web3.eth.personal.ecRecover(hash, signature);
+      if(this.trustedOracles[skillAuthor] === undefined) return entry;
+
+      entry.skillAuthor = this.trustedOracles[skillAuthor];
+      entry.valid = true;
+
+      return entry;
+    });
+
+    this.setState({ csv: await Promise.all(entries) })
   }
 
   render() {
     return (
-      <section className="main-content columns is-fullheight ">
-        <aside className="menu column section is-6 ">
+      <section className="main-content columns ">
+        <aside className="menu column section is-10">
           <p className="menu-label">
             GG Transcripts
           </p>
@@ -129,19 +161,30 @@ class Transcript extends Component {
 
   renderList = () => {
     const data = this.state.csv;
-    
     const columns = [
       {
-      Header: 'Member Id',
-      accessor: 'CBT member-id'
-      },
-      {
         Header: 'Skill',
-        accessor: 'Skill Name'
+        accessor: 'name'
       },
       {
         Header: 'Date Completed',
-        accessor: 'Date Completed'
+        accessor: 'completedAt'
+      },
+      {
+        Header: 'Skill Author',
+        accessor: 'skillAuthor'
+      },
+      {
+        Header: "Validated",
+        Cell: (row) => {
+          if (row.original.valid) {
+            return (<div><span className="icon has-text-success"> <i className="fas fa-check-square"></i> </span></div>)
+          } else {
+            return (<div><span className="icon has-text-danger"><i className="fas fa-ban"></i> </span></div>)
+          }
+          
+        },
+        id: "status"
       }
     ]
     return <ReactTable data={data} columns={columns}/>
