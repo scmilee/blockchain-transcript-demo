@@ -97,8 +97,18 @@ class Transcript extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  onFile = (file) => {
-    this.setState({ csv: file })
+  onFile = (fileArray) => {
+    console.log(fileArray)
+    const headers = fileArray.shift();
+
+    const entries = _.map(fileArray, (line) => {
+      const entry = {};
+      _.forEach(line, (datapoint, i)=> {
+        entry[headers[i]] = datapoint
+      })
+      return entry
+    })
+    this.setState({ csv: entries })
   }
 
   render() {
@@ -120,13 +130,19 @@ class Transcript extends Component {
   renderList = () => {
     const data = this.state.csv;
     
-    const columns = [{
-      Header: 'Skill',
-      accessor: 'name'
-    },{
-      Header: 'Minutes Spent',
-      accessor: 'validatedMinutes'
-    }
+    const columns = [
+      {
+      Header: 'Member Id',
+      accessor: 'CBT member-id'
+      },
+      {
+        Header: 'Skill',
+        accessor: 'Skill Name'
+      },
+      {
+        Header: 'Date Completed',
+        accessor: 'Date Completed'
+      }
     ]
     return <ReactTable data={data} columns={columns}/>
   };
