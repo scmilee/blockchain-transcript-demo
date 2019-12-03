@@ -44,6 +44,7 @@ const Transcripts = () => (
 
 const StyledDropzone = (props)=> {
   const { onFile } = props;
+  
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -147,16 +148,18 @@ class Transcript extends Component {
     return (
       <section className="main-content columns ">
         <aside className="menu column section is-10">
-          <p className="menu-label">
+          <h1 className="menu-label is-size-6">
             GG Transcripts
-          </p>
-          <ul className="menu-list">
+          </h1>
             {this.state.csv ?  this.renderList(): <StyledDropzone onFile= {this.onFile}/>}
-          </ul>
           <div><br/></div>
         </aside>
       </section>
     )
+  }
+
+  resetCSV = () => {
+    this.setState({ csv : false});
   }
 
   renderList = () => {
@@ -187,7 +190,16 @@ class Transcript extends Component {
         id: "status"
       }
     ]
-    return <ReactTable data={data} columns={columns}/>
+    return (
+      <div> 
+          <ReactTable data={data} columns={columns} showPagination={false} showPageSizeOptions={false} defaultPageSize={5} />
+          <br/>
+          <a onClick={()=> this.resetCSV()} className="button is-warning is-pulled-right">
+            New Transcript
+          </a>
+
+      </div>
+    )
   };
 }
 export default Transcripts
