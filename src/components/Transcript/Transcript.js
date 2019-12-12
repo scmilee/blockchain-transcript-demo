@@ -87,7 +87,8 @@ class Transcript extends Component {
     super(props);
     this.web3 = new Web3(new HDWalletProvider(process.env.REACT_APP_QA_ADMIN_MNEMONIC, process.env.REACT_APP_QA_INFURA_ENDPOINT));
     this.trustedOracles = {
-      '0x28841345caadffac6907cb35ac26d4f79f5ebdff' : 'CBT-Nuggets' 
+      '0x28841345caadffac6907cb35ac26d4f79f5ebdff' : 'CBT-Nuggets',
+      '0x265f1b94b59c8bff67c661e40d339a88f9aab459' : 'Comp-TIA'
     }
     this.state = {
       hashes: [],
